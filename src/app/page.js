@@ -2,14 +2,16 @@
 
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { createIdea } from "@/lib/appwrite";
+import { createIdea, logActivity } from "@/lib/appwrite";
 import AuthModal from "@/components/AuthModal";
 import IdeaInput from "@/components/IdeaInput";
 import MarkdownPreview from "@/components/MarkdownPreview";
 import IdeaHistory from "@/components/IdeaHistory";
 
 export default function Home() {
+  const router = useRouter();
   const { user, loading: authLoading, logout } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -17,6 +19,7 @@ export default function Home() {
   const [currentInput, setCurrentInput] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [saveStatus, setSaveStatus] = useState(null);
+  const [activeMode, setActiveMode] = useState("ideas"); // "ideas" | "focus"
 
   const handleGenerate = useCallback(async (input, useThinking, selectedModel) => {
     setIsGenerating(true);
@@ -79,11 +82,18 @@ export default function Home() {
 
     try {
       setSaveStatus("saving");
-      // Extract title from content (first heading or first line)
       const titleMatch = generatedContent.match(/^#\s+(.+)$/m);
       const title = titleMatch ? titleMatch[1] : currentInput.substring(0, 50);
 
       await createIdea(title, currentInput, generatedContent, user.$id);
+      
+      // Log the activity
+      try {
+        await logActivity(user.$id, "idea_created", `Created idea: ${title}`);
+      } catch (activityError) {
+        console.error("Failed to log activity:", activityError);
+      }
+      
       setSaveStatus("saved");
       setRefreshTrigger((prev) => prev + 1);
       setTimeout(() => setSaveStatus(null), 2000);
@@ -107,7 +117,6 @@ export default function Home() {
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-1/2 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
         
-        {/* Grid overlay */}
         <div 
           className="absolute inset-0 opacity-[0.02]"
           style={{
@@ -126,10 +135,8 @@ export default function Home() {
             className="flex items-center gap-3"
           >
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xl">
+                🧠
               </div>
               <motion.div
                 className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-green-400"
@@ -139,11 +146,33 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
-                Brain Dumper
+                BrainDumper
               </h1>
-              <p className="text-xs text-gray-500">Ideas → Documentation</p>
+              <p className="text-xs text-gray-500">Clear your mind, focus better</p>
             </div>
           </motion.div>
+
+          {/* Mode Toggle */}
+          <div className="flex items-center gap-2 bg-gray-800/50 rounded-xl p-1 border border-gray-700">
+            <button
+              onClick={() => setActiveMode("ideas")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                activeMode === "ideas"
+                  ? "bg-purple-500 text-white"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <span>📝</span>
+              <span className="hidden sm:inline">Idea → Docs</span>
+            </button>
+            <button
+              onClick={() => router.push("/app")}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-gray-400 hover:text-white transition-all"
+            >
+              <span>🎯</span>
+              <span className="hidden sm:inline">Focus Mode</span>
+            </button>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -154,7 +183,7 @@ export default function Home() {
               <div className="w-8 h-8 rounded-full bg-gray-800 animate-pulse" />
             ) : user ? (
               <div className="flex items-center gap-3">
-                <div className="text-right">
+                <div className="text-right hidden sm:block">
                   <p className="text-sm font-medium text-white">{user.name}</p>
                   <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
@@ -172,7 +201,7 @@ export default function Home() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowAuthModal(true)}
-                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium hover:from-purple-600 hover:to-pink-600 transition-colors"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium"
               >
                 Sign In
               </motion.button>
@@ -187,55 +216,54 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
           <motion.h2
-            className="text-4xl md:text-6xl font-bold mb-4"
+            className="text-4xl md:text-5xl font-bold mb-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
             <span className="bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 bg-clip-text text-transparent">
-              Transform Your Ideas
+              Transform Ideas
             </span>
             <br />
-            <span className="text-white">into Reality</span>
+            <span className="text-white">into Documentation</span>
           </motion.h2>
           
           <motion.p
-            className="text-lg text-gray-400 max-w-2xl mx-auto"
+            className="text-lg text-gray-400 max-w-2xl mx-auto mb-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
             Explain your idea in <span className="text-purple-400">any language</span> and get a comprehensive 
-            Markdown document ready for <span className="text-pink-400">GitHub Copilot</span> development
+            spec ready for <span className="text-pink-400">development</span>
           </motion.p>
 
-          {/* Features badges */}
+          {/* Feature cards */}
           <motion.div
-            className="flex flex-wrap justify-center gap-3 mt-6"
+            className="flex flex-wrap justify-center gap-4 mb-8"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
           >
-            {[
-              { icon: "🌍", text: "Any Language Input" },
-              { icon: "🤖", text: "AI-Powered" },
-              { icon: "📝", text: "Markdown Output" },
-              { icon: "☁️", text: "Cloud Storage" },
-            ].map((badge, i) => (
-              <motion.span
-                key={badge.text}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.7 + i * 0.1 }}
-                className="px-3 py-1.5 rounded-full bg-gray-800/50 border border-gray-700 text-sm text-gray-300"
-              >
-                {badge.icon} {badge.text}
-              </motion.span>
-            ))}
+            <div 
+              className="p-4 rounded-xl bg-gray-800/50 border border-gray-700 cursor-pointer hover:border-purple-500/50 transition-all"
+              onClick={() => setActiveMode("ideas")}
+            >
+              <div className="text-3xl mb-2">📝</div>
+              <h3 className="font-bold text-white">Idea → Docs</h3>
+              <p className="text-xs text-gray-400">Create product specs</p>
+            </div>
+            <div 
+              className="p-4 rounded-xl bg-gray-800/50 border border-gray-700 cursor-pointer hover:border-orange-500/50 transition-all"
+              onClick={() => router.push("/app")}
+            >
+              <div className="text-3xl mb-2">🎯</div>
+              <h3 className="font-bold text-white">Focus Mode</h3>
+              <p className="text-xs text-gray-400">Organize & focus on tasks</p>
+            </div>
           </motion.div>
         </motion.div>
 
@@ -272,10 +300,11 @@ export default function Home() {
             >
               {saveStatus === "saving" && (
                 <>
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
+                  <motion.div
+                    className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  />
                   Saving...
                 </>
               )}
@@ -313,12 +342,24 @@ export default function Home() {
             Built with 💜 using Next.js, Appwrite & AI
           </p>
           <div className="flex items-center gap-4">
-            <span className="text-xs text-gray-600">Powered by:</span>
-            {["Appwrite", "DeepSeek", "Gemini", "OpenRouter"].map((tech) => (
-              <span key={tech} className="px-2 py-1 text-xs rounded bg-gray-800 text-gray-400">
-                {tech}
-              </span>
-            ))}
+            <button
+              onClick={() => router.push("/dashboard")}
+              className="text-sm text-gray-500 hover:text-white transition-colors flex items-center gap-1"
+            >
+              📊 Dashboard
+            </button>
+            <button
+              onClick={() => router.push("/history")}
+              className="text-sm text-gray-500 hover:text-white transition-colors flex items-center gap-1"
+            >
+              📚 History
+            </button>
+            <button
+              onClick={() => router.push("/settings")}
+              className="text-sm text-gray-500 hover:text-white transition-colors flex items-center gap-1"
+            >
+              ⚙️ Settings
+            </button>
           </div>
         </div>
       </footer>

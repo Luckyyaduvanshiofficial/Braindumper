@@ -153,7 +153,8 @@ export async function POST(request) {
     if (model === "gemini" && geminiKey) {
       // Use Gemini API
       try {
-        const geminiModel = useThinking ? "gemini-2.5-flash-exp" : "gemini-2.5-flash";
+        // Use gemini-2.0-flash for normal, gemini-2.0-flash-thinking-exp for thinking mode
+        const geminiModel = useThinking ? "gemini-2.0-flash-thinking-exp-1219" : "gemini-2.0-flash";
         response = await fetch(`${GEMINI_API_URL}/${geminiModel}:streamGenerateContent?alt=sse&key=${geminiKey}`, {
           method: "POST",
           headers: {
@@ -168,13 +169,37 @@ export async function POST(request) {
             ],
             generationConfig: {
               maxOutputTokens: 8000,
-              temperature: 0.7,
+              temperature: useThinking ? 1.0 : 0.7, // Thinking models need temperature 1.0
             },
           }),
         });
 
         if (response.ok) {
           usedApi = "gemini";
+        } else {
+          // If thinking model fails, fallback to regular model
+          console.error("Gemini thinking model failed, trying regular model");
+          response = await fetch(`${GEMINI_API_URL}/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${geminiKey}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: `${SYSTEM_PROMPT}\n\n---\n\nTransform this idea into a comprehensive Product & Flow Specification:\n\n${userInput}` }]
+                }
+              ],
+              generationConfig: {
+                maxOutputTokens: 8000,
+                temperature: 0.7,
+              },
+            }),
+          });
+          if (response.ok) {
+            usedApi = "gemini";
+          }
         }
       } catch (error) {
         console.error("Gemini API error:", error);

@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0f"/>
+      <stop offset="100%" style="stop-color:#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="text-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="50%" style="stop-color:#ec4899"/>
+      <stop offset="100%" style="stop-color:#f97316"/>
+    </linearGradient>
+    <linearGradient id="brain-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#a855f7"/>
+      <stop offset="50%" style="stop-color:#ec4899"/>
+      <stop offset="100%" style="stop-color:#f97316"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg-gradient)"/>
+  
+  <!-- Grid pattern -->
+  <g opacity="0.03">
+    <pattern id="grid" width="50" height="50" patternUnits="userSpaceOnUse">
+      <path d="M 50 0 L 0 0 0 50" fill="none" stroke="white" stroke-width="1"/>
+    </pattern>
+    <rect width="1200" height="630" fill="url(#grid)"/>
+  </g>
+  
+  <!-- Glow effects -->
+  <circle cx="200" cy="150" r="200" fill="#a855f7" opacity="0.1" filter="blur(80px)"/>
+  <circle cx="1000" cy="480" r="200" fill="#ec4899" opacity="0.1" filter="blur(80px)"/>
+  <circle cx="600" cy="315" r="150" fill="#f97316" opacity="0.05" filter="blur(60px)"/>
+  
+  <!-- Brain icon -->
+  <g transform="translate(100, 180)">
+    <circle cx="75" cy="75" r="70" fill="#1a1a2e" stroke="url(#brain-gradient)" stroke-width="3"/>
+    <g transform="translate(30, 35) scale(0.45)">
+      <path d="M45 10 C25 10, 10 30, 10 50 C10 75, 30 95, 50 95" 
+            fill="none" stroke="url(#brain-gradient)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M35 25 C20 30, 15 45, 20 60" 
+            fill="none" stroke="url(#brain-gradient)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M55 10 C75 10, 90 30, 90 50 C90 75, 70 95, 50 95" 
+            fill="none" stroke="url(#brain-gradient)" stroke-width="8" stroke-linecap="round"/>
+      <path d="M65 25 C80 30, 85 45, 80 60" 
+            fill="none" stroke="url(#brain-gradient)" stroke-width="5" stroke-linecap="round"/>
+      <path d="M50 15 L50 90" 
+            fill="none" stroke="url(#brain-gradient)" stroke-width="4" stroke-linecap="round" stroke-dasharray="10,8"/>
+    </g>
+  </g>
+  
+  <!-- Main title -->
+  <text x="280" y="230" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="800" fill="url(#text-gradient)">
+    BrainDumper
+  </text>
+  
+  <!-- Tagline -->
+  <text x="280" y="300" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="400" fill="#9ca3af">
+    Transform Chaos into Clarity
+  </text>
+  
+  <!-- Features -->
+  <g transform="translate(280, 360)">
+    <g transform="translate(0, 0)">
+      <text font-family="Inter, system-ui, sans-serif" font-size="24" fill="#a855f7">🧠</text>
+      <text x="40" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#d1d5db">Dump your thoughts</text>
+    </g>
+    <g transform="translate(280, 0)">
+      <text font-family="Inter, system-ui, sans-serif" font-size="24" fill="#ec4899">✨</text>
+      <text x="40" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#d1d5db">AI organizes them</text>
+    </g>
+    <g transform="translate(540, 0)">
+      <text font-family="Inter, system-ui, sans-serif" font-size="24" fill="#f97316">🎯</text>
+      <text x="40" font-family="Inter, system-ui, sans-serif" font-size="20" fill="#d1d5db">Focus on one task</text>
+    </g>
+  </g>
+  
+  <!-- URL -->
+  <text x="280" y="550" font-family="Inter, system-ui, sans-serif" font-size="22" fill="#6b7280">
+    dump.miniai.online
+  </text>
+  
+  <!-- Border -->
+  <rect x="20" y="20" width="1160" height="590" fill="none" stroke="url(#brain-gradient)" stroke-width="2" rx="20" opacity="0.3"/>
+</svg>
