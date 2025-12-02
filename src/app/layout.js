@@ -1,7 +1,7 @@
 import "./app.css";
 import { Providers } from "./providers";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dump.miniai.online";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://braindumpapp.vercel.app";
 
 export const metadata = {
   // Basic metadata

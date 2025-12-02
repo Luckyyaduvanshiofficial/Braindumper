@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemaps
-Sitemap: https://dump.miniai.online/sitemap.xml
+Sitemap: https://braindumpapp.vercel.app/sitemap.xml
 
 # Disallow API routes
 Disallow: /api/
