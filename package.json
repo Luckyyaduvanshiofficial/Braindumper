@@ -1,0 +1,29 @@
+{
+  "name": "braindumper",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@appwrite.io/pink-icons": "^1.0.0",
+    "@tailwindcss/postcss": "^4.1.11",
+    "appwrite": "^18.1.1",
+    "framer-motion": "^12.23.25",
+    "next": "15.4.3",
+    "postcss": "^8.5.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "tailwindcss": "^4.1.11"
+  },
+  "devDependencies": {
+    "node-appwrite": "^20.3.0",
+    "prettier": "3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14"
+  }
+}
